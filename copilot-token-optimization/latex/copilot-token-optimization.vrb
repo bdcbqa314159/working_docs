@@ -1,0 +1,15 @@
+\frametitle{Reusable context lives in files}
+Stop re-pasting ``remember, we follow X convention''. Put it in a file Copilot auto-loads.
+
+  \medskip
+  At repo root --- \texttt{.github/copilot-instructions.md}:
+\begin{lstlisting}
+- We use Python 3.12, type hints required.
+- No bare `except`. Use specific exceptions.
+- SQLAlchemy 2.x -- no Query API; use select().
+- Tests in `tests/`, one file per source module.
+\end{lstlisting}
+
+  \medskip
+  For repeated task shapes --- \texttt{.github/prompts/<name>.prompt.md}:
+  reusable templates for ``write tests in our style'', ``refactor to our pattern''.

@@ -1,0 +1,378 @@
+% =============================================================================
+% GitHub Copilot — Token Optimization Under the New Billing
+% Beamer deck (Metropolis theme), 16:9
+%
+% Compile:
+%   latexmk -pdf -xelatex copilot-token-optimization.tex
+% or
+%   xelatex copilot-token-optimization.tex   (run twice for ToC + page numbers)
+%
+% pdflatex also works but Metropolis renders best with XeLaTeX or LuaLaTeX
+% because of the Fira Sans font.
+% =============================================================================
+\documentclass[11pt,aspectratio=169]{beamer}
+
+% --- Theme -------------------------------------------------------------------
+\usetheme{metropolis}
+\metroset{
+  progressbar=frametitle,
+  numbering=fraction,
+  block=fill,
+  sectionpage=progressbar,
+  subsectionpage=progressbar
+}
+
+% --- Encoding & fonts --------------------------------------------------------
+\usepackage[english]{babel}
+\usepackage{microtype}
+\usepackage{fontspec}            % Metropolis prefers XeLaTeX/LuaLaTeX
+
+% --- Colour palette (overrides) ----------------------------------------------
+\definecolor{accentblue}{HTML}{2563EB}
+\definecolor{darkgray}{HTML}{1F2937}
+\definecolor{lightgray}{HTML}{F3F4F6}
+\definecolor{successgreen}{HTML}{059669}
+\definecolor{warningred}{HTML}{DC2626}
+\setbeamercolor{progress bar}{fg=accentblue}
+\setbeamercolor{frametitle}{bg=darkgray}
+\setbeamercolor{title separator}{fg=accentblue}
+
+% --- Tables, graphics, code --------------------------------------------------
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstdefinestyle{prompt}{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{lightgray},
+  frame=none,
+  xleftmargin=10pt,
+  framexleftmargin=10pt,
+  breaklines=true,
+  showstringspaces=false,
+  literate={→}{{$\rightarrow$}}1
+}
+\lstset{style=prompt}
+
+% --- Refs --------------------------------------------------------------------
+% hyperref is auto-loaded by beamer; just configure it here to avoid option clash
+\hypersetup{hidelinks}
+
+% --- Custom commands ---------------------------------------------------------
+\newcommand{\good}{\textcolor{successgreen}{\checkmark}}
+\newcommand{\bad}{\textcolor{warningred}{\textbf{\texttimes}}}
+\newcommand{\hl}[1]{\textbf{\textcolor{accentblue}{#1}}}
+
+% --- Title -------------------------------------------------------------------
+\title{GitHub Copilot}
+\subtitle{Token Optimization Under the New Billing}
+\author{Internal session}
+\institute{Office training pack}
+\date{June 2026}
+
+% =============================================================================
+\begin{document}
+
+\maketitle
+
+% =============================================================================
+\begin{frame}{Agenda}
+  \begin{itemize}
+    \item What changed on 1 June 2026
+    \item The five VS Code Copilot surfaces and what each costs
+    \item Four cost levers, in priority order
+    \item The two-lane workflow
+    \item Quick wins to adopt this week
+  \end{itemize}
+  \vfill
+  \small Time: 20 minutes plus Q\&A.
+\end{frame}
+
+% =============================================================================
+\section{What changed}
+
+\begin{frame}{What changed on 1 June 2026}
+  \begin{itemize}
+    \item \textbf{Old system:} one chat turn $=$ one ``premium request'', multiplied by a per-model factor. Plans gave us \hl{N requests per month}.
+    \item \textbf{New system:} plans give us a \hl{dollar budget in AI Credits}. Every paid surface bills against it \hl{by tokens $\times$ per-model rate}.
+  \end{itemize}
+  \vfill
+  \begin{block}{Three things to remember}
+    \begin{itemize}
+      \item \hl{1 AI Credit $=$ \$0.01}
+      \item Code completion and Next Edit Suggestions remain \hl{free}
+      \item Chat, Edit mode, Agent mode, Code Review are \hl{paid}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Why this matters}
+  A realistic Agent-mode session on Opus can spend \hl{\$0.50 to \$5+} in credits.
+
+  \medskip
+  Public reports document developers burning \hl{\$30--40 in a single morning} on long agentic sessions.
+
+  \medskip
+  Pro is \hl{\$10/month}. The math is unforgiving if we are not deliberate.
+
+  \vfill
+  \begin{alertblock}{The good news}
+    The highest-frequency Copilot interactions --- inline completion and Next Edit Suggestions --- remain \hl{unmetered}. Most of the productivity we get from Copilot is in the free lane.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Plan allowances}
+  \centering
+  \begin{tabular}{lrr}
+    \toprule
+    \textbf{Plan} & \textbf{Monthly cost} & \textbf{Monthly AI Credits} \\
+    \midrule
+    Copilot Pro            & \$10        & \$10 \\
+    Copilot Pro+           & \$39        & \$39 \\
+    Copilot Business       & \$19 / seat & \$19 / seat \\
+    Copilot Enterprise     & \$39 / seat & \$39 / seat \\
+    \bottomrule
+  \end{tabular}
+
+  \vfill
+  \small No rollover. Overage billable per token (admin policy applies).
+\end{frame}
+
+% =============================================================================
+\section{The surfaces}
+
+\begin{frame}{The five surfaces in VS Code}
+  \centering\small
+  \begin{tabular}{lcl}
+    \toprule
+    \textbf{Surface} & \textbf{Bills?} & \textbf{Typical cost shape} \\
+    \midrule
+    Code completion (ghost text)        & \good\ no  & Free \\
+    Next Edit Suggestions               & \good\ no  & Free \\
+    Chat --- Ask                        & \bad\ yes  & Small per turn \\
+    Chat --- Edit                       & \bad\ yes  & Medium --- whole file in \& out \\
+    Chat --- Agent                      & \bad\ yes  & \hl{Largest} --- tool output stacks \\
+    Code Review (PR / inline)           & \bad\ yes  & Per review, $\propto$ diff size \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}[fragile]{Where the tokens come from}
+  On every paid turn:
+\begin{lstlisting}
+cost = (prompt + attached context + chat history
+        + tool output history)      x  input_rate
+     + (model reply + tool calls)   x  output_rate
+\end{lstlisting}
+  \medskip
+  Four controllable levers, in priority order:
+  \begin{enumerate}
+    \item \hl{Which model} --- 10$\times$ spread between cheapest and most expensive
+    \item \hl{Tool output history} --- agent mode only, but dominates totals there
+    \item \hl{Attached context size} --- \texttt{\#selection} vs \texttt{@workspace} vs dragged folder
+    \item \hl{Chat history length} --- new chat per topic
+  \end{enumerate}
+\end{frame}
+
+% =============================================================================
+\section{The levers}
+
+\begin{frame}{Lever 1 --- Model selection}
+  The \hl{single highest-leverage decision} you make per turn.
+
+  \medskip
+  \centering\small
+  \begin{tabular}{lll}
+    \toprule
+    \textbf{Tier} & \textbf{Examples} & \textbf{When to use} \\
+    \midrule
+    Cheap    & Haiku 4.5, GPT-5 mini, Gemini 3 Flash & Exploration, summarising, simple edits \\
+    Standard & Sonnet 4.6, GPT-5.4, Gemini 3.1 Pro   & Multi-file edits, careful implementation \\
+    Premium  & Opus 4.7, GPT-5.5                     & Hard reasoning, debugging, architecture \\
+    \bottomrule
+  \end{tabular}
+
+  \vfill
+  \raggedright
+  \textbf{Action:} in VS Code, set your default chat model to a \hl{cheap-lane} model. Escalate deliberately, not reflexively.
+\end{frame}
+
+\begin{frame}[fragile]{The two-lane workflow}
+\begin{lstlisting}
+EXPLORE  ->  Cheap lane (Haiku, GPT-5 mini)
+             ask . plan . summarise . iterate freely
+                          |
+                          v
+EXECUTE  ->  Premium lane (Sonnet+ / Opus)
+             one well-formed implementation turn
+                          |
+                          v
+VERIFY   ->  Cheap lane again
+             review the diff . write tests
+\end{lstlisting}
+  \vfill
+  Framing: \hl{expensive models for executing locked decisions; cheap models for exploring undecided ones}.
+\end{frame}
+
+\begin{frame}[fragile]{Lever 2 --- Context size}
+  Every attached token is paid input \hl{on every turn it stays in the conversation}.
+
+  \medskip
+  Cost ranking, cheapest to most expensive:
+\begin{lstlisting}
+#selection  <  #editor  <  #file:<name>  <  @workspace  <  dragged folder
+\end{lstlisting}
+
+  \medskip
+  Rules of thumb:
+  \begin{itemize}
+    \item 20 lines matter? \texttt{\#selection} them.
+    \item One file matters? \texttt{\#file:} it --- not \texttt{@workspace}.
+    \item \texttt{@workspace} is for ``I don't know which files matter yet.''
+    \item \hl{Never drag a folder} unless that is truly the intent.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Lever 3 --- Conversation hygiene}
+  \textbf{Anti-pattern --- prompt-chipping:}
+\begin{lstlisting}
+"Refactor this to use a dict."
+"Actually use defaultdict."
+"Make the keys strings."
+"Add type hints."
+\end{lstlisting}
+  Four turns, four bills, each carrying the whole history.
+
+  \medskip
+  \textbf{Pattern --- one complete brief:}
+\begin{lstlisting}
+"Refactor this to use a
+ collections.defaultdict[str, list[Foo]],
+ add type hints, keep the existing public signature."
+\end{lstlisting}
+  One turn. One bill. Often better output too.
+\end{frame}
+
+\begin{frame}{Lever 4 --- Agent mode discipline}
+  Agent mode is where the budget vanishes if you are casual.
+
+  \medskip
+  \textbf{Front-load the brief:}
+  \begin{itemize}
+    \item \textbf{Task} --- one sentence
+    \item \textbf{In scope / Out of scope} --- which files; what NOT to touch
+    \item \textbf{Constraints} --- patterns to preserve, libs required/forbidden
+    \item \textbf{Definition of Done} --- how the agent knows to stop
+    \item \textbf{Reporting} --- summarise files touched and assumptions
+  \end{itemize}
+
+  \vfill
+  A well-shaped brief routinely \hl{cuts agent sessions from 20 turns to 4--6}.
+\end{frame}
+
+\begin{frame}{Watch the token counter}
+  The chat panel shows the running token usage in the \hl{bottom-right corner}.
+
+  \medskip
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    \textbf{Tokens in context} & \textbf{What to do} \\
+    \midrule
+    Under 30K & Comfortable, continue \\
+    30--80K   & Expensive on premium --- check whether you are going in circles \\
+    80K+      & Stop. Summarise to a fresh chat. \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+% =============================================================================
+\section{Reusable context \& habits}
+
+\begin{frame}[fragile]{Reusable context lives in files}
+  Stop re-pasting ``remember, we follow X convention''. Put it in a file Copilot auto-loads.
+
+  \medskip
+  At repo root --- \texttt{.github/copilot-instructions.md}:
+\begin{lstlisting}
+- We use Python 3.12, type hints required.
+- No bare `except`. Use specific exceptions.
+- SQLAlchemy 2.x -- no Query API; use select().
+- Tests in `tests/`, one file per source module.
+\end{lstlisting}
+
+  \medskip
+  For repeated task shapes --- \texttt{.github/prompts/<name>.prompt.md}:
+  reusable templates for ``write tests in our style'', ``refactor to our pattern''.
+\end{frame}
+
+\begin{frame}{Quick wins --- adopt this week}
+  \begin{itemize}
+    \item \good\ \textbf{Default model} $\rightarrow$ Haiku 4.5 or GPT-5 mini in VS Code
+    \item \good\ \textbf{Bind a shortcut} $\rightarrow$ ``New Chat'' for one-keystroke restart
+    \item \good\ \textbf{\texttt{.github/copilot-instructions.md}} in every active repo
+    \item \good\ \textbf{Stop drag-folder} entirely; always \texttt{\#file:} or \texttt{@workspace}
+    \item \good\ \textbf{One brief, not four chips} --- write the full prompt
+    \item \good\ \textbf{Glance at the token counter} before big turns
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{What we are trading}
+  These habits feel like upfront work.
+
+  \medskip
+  The trade is \hl{upfront thinking} vs.\ \hl{downstream burn}:
+  \medskip
+  \centering
+  \begin{tabular}{lr}
+    \toprule
+    \textbf{Habit} & \textbf{Cost} \\
+    \midrule
+    Writing a complete prompt        & +1 min thinking \\
+    Switching models mid-task        & +5 sec clicks \\
+    Starting a new chat per topic    & +2 sec \\
+    \midrule
+    \textbf{Effect on credit burn}   & \hl{$-50\%$ to $-80\%$} typical \\
+    \textbf{Effect on output quality}& Usually meaningfully better \\
+    \textbf{Effect on rework}        & Lower \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+% =============================================================================
+\section{Summary}
+
+\begin{frame}{Summary --- the five rules}
+  \begin{enumerate}
+    \item \hl{Free is free} --- completion and NES don't bill. Default to them whenever the task is shaped like ``complete this''.
+    \item \hl{Cheap model first} --- explore on Haiku or mini; escalate only to execute a locked plan.
+    \item \hl{Attach less} --- \texttt{\#selection} before \texttt{\#editor} before \texttt{\#file:} before \texttt{@workspace}.
+    \item \hl{One task $=$ one chat} --- new chat per topic change.
+    \item \hl{Agent mode $=$ high-stakes mode} --- front-load the brief, set the Definition of Done.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Resources we maintain}
+  Everything in this talk is documented in the team folder:
+  \begin{itemize}
+    \item \texttt{README.md} --- overview and how to use the pack
+    \item \texttt{01-new-billing-model.md} --- the billing system, allowances, model rate card
+    \item \texttt{02-vscode-surfaces.md} --- per-surface deep dive
+    \item \texttt{03-optimization-playbook.md} --- the full playbook
+    \item \texttt{04-cheatsheet.md} --- one-page printable reference
+    \item \texttt{appendix-sources.md} --- every claim, where it came from
+  \end{itemize}
+\end{frame}
+
+% =============================================================================
+\begin{frame}[plain]
+  \begin{center}
+    {\Huge Thank you}\\[1.2em]
+    {\Large Questions?}\\[2.4em]
+    \small \textit{Verified June 2026 against docs.github.com/en/copilot/reference/copilot-billing.}
+  \end{center}
+\end{frame}
+
+\end{document}

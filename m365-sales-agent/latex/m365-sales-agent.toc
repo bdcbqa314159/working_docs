@@ -1,0 +1,7 @@
+\babel@toc {english}{}\relax 
+\beamer@sectionintoc {1}{What it is}{3}{0}{1}
+\beamer@sectionintoc {2}{The ``customised pitch'' workflow}{8}{0}{2}
+\beamer@sectionintoc {3}{Other capabilities}{13}{0}{3}
+\beamer@sectionintoc {4}{FS fit}{17}{0}{4}
+\beamer@sectionintoc {5}{Our access situation}{21}{0}{5}
+\beamer@sectionintoc {6}{Summary}{25}{0}{6}

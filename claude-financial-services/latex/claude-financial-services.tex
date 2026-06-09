@@ -1,0 +1,344 @@
+% =============================================================================
+% Claude for Financial Services — what it is, and where we stand
+% Beamer deck (Metropolis theme), 16:9
+%
+% Compile:
+%   latexmk -pdf -xelatex claude-financial-services.tex
+% =============================================================================
+\documentclass[11pt,aspectratio=169]{beamer}
+
+% --- Theme -------------------------------------------------------------------
+\usetheme{metropolis}
+\metroset{
+  progressbar=frametitle,
+  numbering=fraction,
+  block=fill,
+  sectionpage=progressbar,
+  subsectionpage=progressbar
+}
+
+% --- Encoding & fonts --------------------------------------------------------
+\usepackage[english]{babel}
+\usepackage{microtype}
+\usepackage{fontspec}
+
+% --- Colour palette ----------------------------------------------------------
+\definecolor{accentpurple}{HTML}{7C3AED}
+\definecolor{darkgray}{HTML}{1F2937}
+\definecolor{lightgray}{HTML}{F3F4F6}
+\definecolor{successgreen}{HTML}{059669}
+\definecolor{warningred}{HTML}{DC2626}
+\setbeamercolor{progress bar}{fg=accentpurple}
+\setbeamercolor{frametitle}{bg=darkgray}
+\setbeamercolor{title separator}{fg=accentpurple}
+
+% --- Tables / graphics / code ------------------------------------------------
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstdefinestyle{prompt}{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{lightgray},
+  frame=none,
+  xleftmargin=10pt,
+  framexleftmargin=10pt,
+  breaklines=true,
+  showstringspaces=false,
+}
+\lstset{style=prompt}
+
+% hyperref is auto-loaded by beamer; just configure it here to avoid option clash
+\hypersetup{hidelinks}
+
+% --- Custom commands ---------------------------------------------------------
+\newcommand{\good}{\textcolor{successgreen}{\checkmark}}
+\newcommand{\bad}{\textcolor{warningred}{\textbf{\texttimes}}}
+\newcommand{\hl}[1]{\textbf{\textcolor{accentpurple}{#1}}}
+
+% --- Title -------------------------------------------------------------------
+\title{Claude for Financial Services}
+\subtitle{What it is, and where we stand}
+\author{Internal briefing}
+\institute{Informational --- no procurement ask}
+\date{June 2026}
+
+% =============================================================================
+\begin{document}
+
+\maketitle
+
+% =============================================================================
+\begin{frame}{What this deck is --- and isn't}
+  \textbf{Is:}
+  \begin{itemize}
+    \item An honest account of what Claude for Financial Services is
+    \item A clear statement of what we can and cannot do with it today
+    \item Pragmatic guidance for working well with what we have
+  \end{itemize}
+  \vfill
+  \textbf{Isn't:}
+  \begin{itemize}
+    \item A procurement ask
+    \item A criticism of M365 Copilot
+    \item Encouragement to use personal Claude accounts for office work
+  \end{itemize}
+\end{frame}
+
+% =============================================================================
+\section{What it is}
+
+\begin{frame}{The headline}
+  On \hl{5 May 2026}, Anthropic launched Claude for Financial Services:
+  \begin{itemize}
+    \item \textbf{10 ready-to-run agent templates} for high-volume FS work
+    \item \textbf{Deep integration with Microsoft 365} (Excel, PowerPoint, Word, Outlook)
+    \item \textbf{MCP-based connectors} to $\sim$11 financial data providers
+    \item \textbf{Enterprise controls}: SSO, SCIM, audit logs, ISO/IEC 42001:2023
+  \end{itemize}
+
+  \vfill
+  Underlying model: \hl{Claude Opus 4.7} --- leads Vals AI Finance Agent benchmark at \hl{64.37\%}.
+\end{frame}
+
+\begin{frame}{The 10 agent templates}
+  \centering\footnotesize
+  \begin{tabular}{lp{0.6\textwidth}}
+    \toprule
+    \multicolumn{2}{l}{\textit{Research \& Client Coverage}} \\
+    \midrule
+    Pitch Builder       & Target lists $\rightarrow$ comps $\rightarrow$ pitchbook + cover note \\
+    Meeting Preparer    & Client / counterparty briefs ahead of calls \\
+    Earnings Reviewer   & Transcripts + filings $\rightarrow$ model updates + flagged changes \\
+    Model Builder       & Builds models from filings, feeds, analyst inputs \\
+    Market Researcher   & Sector / issuer tracking; news + filings + broker synthesis \\
+    \midrule
+    \multicolumn{2}{l}{\textit{Finance \& Operations}} \\
+    \midrule
+    Valuation Reviewer  & Checks valuations vs comparables and firm standards \\
+    GL Reconciler       & Reconciles GL accounts; NAV calculations \\
+    Month-End Closer    & Close checklist, journal entries, close reports \\
+    Statement Auditor   & Statement consistency and audit-readiness review \\
+    KYC Screener        & Assembles entity files, packages escalations \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{How each template is built}
+  Each template is a \hl{bundle of three layers}:
+
+  \medskip
+  \begin{enumerate}
+    \item \textbf{Skills} --- markdown instructions and domain knowledge (\textit{``how a senior banker does this'', written down})
+    \item \textbf{Connectors} --- governed MCP access to data (Daloopa, FactSet, S\&P, Moody's, \ldots)
+    \item \textbf{Subagents} --- specialised Claude models the main agent calls for sub-tasks
+  \end{enumerate}
+
+  \vfill
+  Design innovation: \hl{skills are inspectable markdown, connectors are scoped, subagents are addressable}. Not a black box.
+\end{frame}
+
+\begin{frame}{Microsoft 365 integration}
+  This is the overlap with our existing M365 Copilot.
+
+  \medskip
+  \centering\small
+  \begin{tabular}{lp{0.55\textwidth}}
+    \toprule
+    \textbf{App} & \textbf{What Claude does} \\
+    \midrule
+    Excel       & Builds models from filings + data feeds; audits formulas; sensitivities \\
+    PowerPoint  & Drafts decks that auto-update when numbers change \\
+    Word        & Edits credit memos against firm templates \\
+    Outlook     & Drafts cover notes for pitchbooks \\
+    \bottomrule
+  \end{tabular}
+
+  \vfill
+  \raggedright Independent benchmark: \hl{83\%} on complex Excel tasks (Financial Modeling World Cup, via FundamentalLabs).
+\end{frame}
+
+\begin{frame}{Data connectors}
+  MCP-based, governed, scoped, auditable:
+
+  \vfill
+  \centering
+  Daloopa $\cdot$ Morningstar $\cdot$ S\&P Global $\cdot$ FactSet $\cdot$ Moody's
+  \medskip\\
+  MT Newswires $\cdot$ Aiera $\cdot$ LSEG $\cdot$ PitchBook $\cdot$ Chronograph $\cdot$ Egnyte
+
+  \vfill
+  \raggedright
+  Not a model scraping the web. \hl{Governed, auditable connections} --- the form of integration regulated firms actually need.
+\end{frame}
+
+% =============================================================================
+\section{How it ships}
+
+\begin{frame}{Three access paths}
+  \centering\small
+  \begin{tabular}{lp{0.35\textwidth}p{0.32\textwidth}}
+    \toprule
+    \textbf{Path} & \textbf{What you get} & \textbf{Requires} \\
+    \midrule
+    A. M365 + Cowork     & The polished, in-the-flow path & Claude Team / Enterprise + M365 plugin install \\
+    B. Claude Code       & Developer-facing terminal flow & Claude Code subscription \\
+    C. Managed Agents    & Programmatic, autonomous & Org Anthropic API + engineering \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+% =============================================================================
+\section{Where we stand}
+
+\begin{frame}{What we have --- and don't}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.46\textwidth}
+      \textbf{Have} \medskip
+      \begin{itemize}
+        \item \good\ Microsoft 365 Copilot
+        \item \good\ GitHub Copilot
+      \end{itemize}
+      \medskip
+      \footnotesize\textit{The full list of sanctioned office AI tooling.}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \textbf{Don't have} \medskip
+      \begin{itemize}
+        \footnotesize
+        \item \bad\ Claude.ai (consumer)
+        \item \bad\ Claude Team / Enterprise
+        \item \bad\ Claude for M365 plugin
+        \item \bad\ Claude Cowork
+        \item \bad\ Claude Code
+        \item \bad\ Anthropic API (org-level)
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vfill
+  \hl{No path} from M365 Copilot or GitHub Copilot to the Claude FS agents. The two product families are separate.
+\end{frame}
+
+\begin{frame}{On personal accounts}
+  Some of us hold personal Claude subscriptions. Important boundary:
+
+  \vfill
+  \begin{exampleblock}{}
+    A personal account is \hl{not a sanctioned channel for office work}.
+    \medskip
+    \begin{itemize}
+      \item No DPA with our firm.
+      \item No audit logging into our compliance posture.
+      \item Default Anthropic retention (not enterprise zero-retention).
+    \end{itemize}
+    \medskip
+    \textbf{Personal Claude is for personal exploration. Office work goes through office-sanctioned tools.}
+  \end{exampleblock}
+
+  \vfill
+  This is true regardless of how useful the output looks.
+\end{frame}
+
+\begin{frame}{What we are NOT saying --- and what we ARE}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}
+      \textbf{NOT} \medskip
+      \footnotesize
+      \begin{enumerate}
+        \item \textbf{Not} that M365 Copilot is bad. Strong for FS work inside M365 surfaces.
+        \item \textbf{Not} that Claude is necessarily better. Different shapes; comparison is task-dependent.
+        \item \textbf{Not} lobbying for procurement. Informational only.
+        \item \textbf{Not} encouraging personal-account workarounds.
+      \end{enumerate}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{ARE} \medskip
+      \footnotesize
+      \begin{enumerate}
+        \item The Claude FS offering is real, well-engineered, relevant to our discipline.
+        \item We don't have access through any office channel today.
+        \item Understanding what it is helps us make informed tooling judgements.
+      \end{enumerate}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================================
+\section{What we can do today}
+
+\begin{frame}{Where M365 Copilot earns its keep for FS}
+  \centering\small
+  \begin{tabular}{lp{0.45\textwidth}}
+    \toprule
+    \textbf{Task} & \textbf{Why it works} \\
+    \midrule
+    Drafting client emails, cover notes & Outlook native context \\
+    Summarising Teams meetings & Live transcript + speakers \\
+    Summarising SharePoint trees & Native indexing \\
+    First-cut models in Excel & Scaffolds from a written spec \\
+    Sensitivity on existing models & Vary X by $\pm10\%$, show Y \\
+    Drafting dashboard commentary & Reads data, writes narrative \\
+    Reconciling vs Dynamics 365 / SAP & If connectors installed \\
+    Summarising credit memos in Word & With file open in Word \\
+    \bottomrule
+  \end{tabular}
+
+  \vfill
+  \raggedright \textbf{Pattern}: anything inside M365 that benefits from knowing what's around it.
+\end{frame}
+
+\begin{frame}{Where M365 Copilot is weak for FS}
+  \centering\small
+  \begin{tabular}{lp{0.45\textwidth}}
+    \toprule
+    \textbf{Task} & \textbf{Why} \\
+    \midrule
+    Building a model from a filing & Reasonable; complex modelling not its strength \\
+    Multi-doc synthesis across 200 pages & Useful context degrades \\
+    Source attribution on every claim & Inconsistent \\
+    Pulling from FactSet / S\&P / PitchBook & No native connectors \\
+    Autonomous multi-step workflows & Requires Copilot Studio build \\
+    Complex Excel formula-chain auditing & Improving; below Claude on FMW tasks \\
+    \bottomrule
+  \end{tabular}
+
+  \vfill
+  \raggedright \textbf{Implication}: route the task to the surface that fits. Don't force Copilot into things it's weak at.
+\end{frame}
+
+\begin{frame}{What to tell colleagues asking about Claude}
+  \begin{exampleblock}{Clean two-sentence version}
+    \textit{Yes --- Anthropic launched Claude for Financial Services in May. It's a strong product for our type of work, but we don't have a sanctioned channel to use it: our office AI tooling today is Microsoft 365 Copilot and GitHub Copilot, and Claude requires a separate subscription we haven't acquired.}
+  \end{exampleblock}
+
+  \vfill
+  \begin{block}{If they push: ``can I just use my personal account?''}
+    \textit{Not on office data, no --- that would be a data-handling issue regardless of how useful the output is. Personal Claude is fine for personal exploration; office work goes through office-sanctioned tools.}
+  \end{block}
+\end{frame}
+
+% =============================================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item Claude for Financial Services is \hl{real, polished, relevant} --- 10 FS agents, M365 integration, governed FS data connectors, enterprise controls.
+    \item We \hl{don't have access} through any current office channel; M365 Copilot + GitHub Copilot are our tools today.
+    \item M365 Copilot is \textbf{well-suited} to a large slice of FS work; route tasks intelligently.
+    \item The Anthropic FS repo is \textbf{Apache 2.0} --- worth reading as reference material even without subscription access.
+    \item This briefing is \textbf{informational}, not a procurement ask.
+  \end{itemize}
+\end{frame}
+
+% =============================================================================
+\begin{frame}[plain]
+  \begin{center}
+    {\Huge Thank you}\\[1.2em]
+    {\Large Questions?}\\[2.4em]
+    \small \textit{Verified June 2026 against anthropic.com / claude.com / github.com/anthropics/financial-services.}
+  \end{center}
+\end{frame}
+
+\end{document}

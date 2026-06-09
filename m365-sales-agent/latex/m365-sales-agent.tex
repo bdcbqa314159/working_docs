@@ -1,0 +1,419 @@
+% =============================================================================
+% Microsoft 365 Sales Agent — what it is, what it does for pitches,
+% and whether it fits FS
+% Beamer deck (Metropolis theme), 16:9
+%
+% Compile:
+%   latexmk -pdf -xelatex m365-sales-agent.tex
+% =============================================================================
+\documentclass[11pt,aspectratio=169]{beamer}
+
+% --- Theme -------------------------------------------------------------------
+\usetheme{metropolis}
+\metroset{
+  progressbar=frametitle,
+  numbering=fraction,
+  block=fill,
+  sectionpage=progressbar,
+  subsectionpage=progressbar
+}
+
+% --- Encoding & fonts --------------------------------------------------------
+\usepackage[english]{babel}
+\usepackage{microtype}
+\usepackage{fontspec}
+
+% --- Colour palette ----------------------------------------------------------
+\definecolor{accentteal}{HTML}{0891B2}
+\definecolor{darkgray}{HTML}{1F2937}
+\definecolor{lightgray}{HTML}{F3F4F6}
+\definecolor{successgreen}{HTML}{059669}
+\definecolor{warningred}{HTML}{DC2626}
+\setbeamercolor{progress bar}{fg=accentteal}
+\setbeamercolor{frametitle}{bg=darkgray}
+\setbeamercolor{title separator}{fg=accentteal}
+
+% --- Tables / graphics / code ------------------------------------------------
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstdefinestyle{prompt}{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{lightgray},
+  frame=none,
+  xleftmargin=10pt,
+  framexleftmargin=10pt,
+  breaklines=true,
+  showstringspaces=false,
+}
+\lstset{style=prompt}
+
+% --- Refs --------------------------------------------------------------------
+% hyperref is auto-loaded by beamer; just configure it here to avoid option clash
+\hypersetup{hidelinks}
+
+% --- Custom commands ---------------------------------------------------------
+\newcommand{\good}{\textcolor{successgreen}{\checkmark}}
+\newcommand{\bad}{\textcolor{warningred}{\textbf{\texttimes}}}
+\newcommand{\hl}[1]{\textbf{\textcolor{accentteal}{#1}}}
+
+% --- Title -------------------------------------------------------------------
+\title{Microsoft 365 Sales Agent}
+\subtitle{What it is, what it does for pitches, and whether it fits FS}
+\author{Internal briefing}
+\institute{Informational --- no procurement ask}
+\date{June 2026}
+
+% =============================================================================
+\begin{document}
+
+\maketitle
+
+% =============================================================================
+\begin{frame}{What this deck is --- and isn't}
+  \textbf{Is:}
+  \begin{itemize}
+    \item A factual picture of Microsoft's Sales agent in M365 Copilot
+    \item A walk-through of the ``customised pitch'' workflow specifically
+    \item An honest FS-fit assessment + our access reality
+  \end{itemize}
+  \vfill
+  \textbf{Isn't:}
+  \begin{itemize}
+    \item A procurement ask
+    \item A claim that Sales agent does IB-style pitchbooks (it doesn't)
+    \item A statement on whether we already have it (depends on tenant config)
+  \end{itemize}
+\end{frame}
+
+% =============================================================================
+\section{What it is}
+
+\begin{frame}{Sales agent is not the same thing as M365 Copilot}
+  Most common misconception. Disambiguation up front:
+
+  \medskip
+  \centering\small
+  \begin{tabular}{lp{0.32\textwidth}p{0.32\textwidth}}
+    \toprule
+    \textbf{Product} & \textbf{What it is} & \textbf{Who has it} \\
+    \midrule
+    M365 Copilot       & Generic AI layer across M365 apps & Anyone with M365 Copilot licence \\
+    M365 Sales agent   & Role-based add-on for sellers; connects M365 Copilot to a CRM & M365 Copilot licence \textbf{+} admin install \textbf{+} CRM \\
+    \bottomrule
+  \end{tabular}
+
+  \vfill
+  \raggedright Sales agent is \hl{not a separate licence} --- but it requires \hl{admin install} and a \hl{CRM dependency}.
+\end{frame}
+
+\begin{frame}{What Sales agent adds on top of M365 Copilot}
+  Three things:
+  \medskip
+  \begin{enumerate}
+    \item \textbf{CRM-grounded context} in Outlook + Teams + M365 Copilot chat
+    \item \textbf{Sales-specific workflows} (meeting prep, recap, account/opportunity summaries, customised pitches)
+    \item \textbf{Autonomous agents} (preview / early access):
+      \begin{itemize}
+        \item \textit{Lead Research and Outreach agent} (preview)
+        \item \textit{Sales Development agent} (more autonomous)
+      \end{itemize}
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Required ingredients --- all four must be true}
+  \begin{enumerate}
+    \item \textbf{Microsoft 365 Copilot licence} for the user.
+    \item \textbf{Sales agent app installed} in the tenant by an M365 admin.
+    \item \textbf{CRM connection} --- Dynamics 365 Sales or Salesforce Sales Cloud (Pro+ edition).
+    \item \textbf{CRM tables configured} so Sales agent knows what to surface.
+  \end{enumerate}
+
+  \vfill
+  If any of these is missing, Sales agent either \hl{won't appear} or \hl{won't return useful responses}.
+\end{frame}
+
+\begin{frame}{What Sales agent is NOT}
+  \begin{itemize}
+    \item \bad\ \textbf{Not} for users with M365 Copilot but no CRM --- it literally won't function.
+    \item \bad\ \textbf{Not} available on on-premise CRM. Cloud-only.
+    \item \bad\ \textbf{Not} available in US GCC, GCC High, DoD, or any sovereign cloud. \hl{Hard restriction}.
+    \item \bad\ \textbf{Not} an investment-banking pitchbook generator. ``Pitch'' here means a B2B sales pitch --- a personalised slide + a Word proposal --- \textit{not} a 50-slide deal pitchbook with comps + DCF.
+  \end{itemize}
+\end{frame}
+
+% =============================================================================
+\section{The ``customised pitch'' workflow}
+
+\begin{frame}{The headline use case --- ``make a customised pitch''}
+  Microsoft documents this as a \hl{6-step scenario}.
+
+  \medskip
+  \begin{exampleblock}{Caveat --- set expectations}
+    The ``pitch'' here is a \hl{B2B sales pitch}: a personalised slide deck + a Word proposal, tailored to one customer.
+
+    \medskip
+    It is \hl{not} an IB-style transaction pitchbook. The audience is a customer being sold to, not an internal investment committee.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{The 6 steps, exactly as Microsoft documents them}
+  \centering\footnotesize
+  \begin{tabular}{lll>{\raggedright\arraybackslash}p{0.30\textwidth}}
+    \toprule
+    \textbf{Step} & \textbf{Surface} & \textbf{Input} & \textbf{Output} \\
+    \midrule
+    1. Prepare for Discovery   & Microsoft Loop & Team collaboration & Brainstormed strategies \\
+    2. Research the Company    & M365 Copilot Chat & Annual report + CRM data & Customer summary \\
+    3. Review Interactions     & M365 Copilot Chat & Email threads + comms & Bulleted notes + call script \\
+    4. Update Presentation     & PowerPoint + Copilot & Customer details & Personalised slide \\
+    5. Summarize Meeting       & Teams / Teams Rooms & Meeting recording & Recap + action items \\
+    6. Create Proposal         & Word + Office Agent & Meeting info & Draft proposal \\
+    \bottomrule
+  \end{tabular}
+
+  \vfill
+  \raggedright Output: \hl{a personalised PowerPoint slide + a Word proposal}, tailored to one named customer.
+\end{frame}
+
+\begin{frame}{How long does this actually take?}
+  Microsoft frames each step as ``minutes''. In reality:
+
+  \medskip
+  \begin{itemize}
+    \item Known customer: \hl{1--2 hours} for the whole workflow
+    \item Cold customer: \hl{3--4 hours}
+  \end{itemize}
+
+  \vfill
+  The saving vs.\ building from scratch is real \textbf{but bounded}.
+
+  \medskip
+  Not ``a day to ten minutes''. More like \hl{a day to half a day}.
+\end{frame}
+
+\begin{frame}{What the pitch workflow is NOT good for}
+  \begin{itemize}
+    \item \bad\ \textbf{Multi-product, multi-stakeholder} enterprise pitches where the deck needs many customer-specific slides --- the workflow personalises one slide well, not a full deck.
+    \item \bad\ \textbf{Quantitative analysis} --- comparisons, ROI models, deal economics. Copilot in Excel does some of this, but it is not part of this workflow.
+    \item \bad\ \textbf{High-design pitchbooks} where visual quality matters as much as content --- Copilot generates structurally clean but visually average PPT.
+  \end{itemize}
+\end{frame}
+
+% =============================================================================
+\section{Other capabilities}
+
+\begin{frame}{Group A --- CRM in flow (always-on)}
+  Sales agent surfaces CRM data wherever you already are:
+
+  \medskip
+  \centering\footnotesize
+  \begin{tabular}{p{0.42\textwidth}ll}
+    \toprule
+    \textbf{Use case} & \textbf{Surface} \\
+    \midrule
+    Open email from a contact $\rightarrow$ Sales pane              & Outlook \\
+    Search CRM without leaving Outlook                              & Outlook + Teams \\
+    Log activity to CRM in one click                                & Outlook + Teams \\
+    ``What is the status of opportunity X?''                        & M365 Copilot chat \\
+    Pre-meeting brief (CRM history + Bing public-web context)       & Teams \\
+    Meeting recap (action items, BANT, keywords, logged to CRM)     & Teams \\
+    \bottomrule
+  \end{tabular}
+
+  \vfill
+  \raggedright \small Often the highest cumulative time-saver. \hl{Most users get more value from these than from the showier agents.}
+\end{frame}
+
+\begin{frame}{Group B --- Assisted workflows}
+  You trigger; agent helps:
+
+  \medskip
+  \begin{itemize}
+    \item \textbf{Summarize email thread + draft reply} --- with CRM context overlaid (``Mike said X'' annotated with ``Mike is CFO at Contoso, opp worth \$240K, last touchpoint 3 days ago'').
+    \item \textbf{Summarize sales meeting} --- structured recap with action items, KPIs, BANT analysis, ready-to-send.
+    \item \textbf{Update opportunity from a meeting} --- suggested CRM updates (stage changes, close-date moves, competitor mentions) for approval.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Group C --- Autonomous workflows (preview)}
+  \textbf{Lead Research and Outreach agent (preview):}
+  \begin{itemize}
+    \item Researches every lead in CRM queue (CRM + web + 3rd-party data)
+    \item Generates personalised outreach emails
+    \item \textit{Optional, early-access form}: sends emails, follows up, qualifies leads autonomously, hands off to humans when ready
+  \end{itemize}
+
+  \medskip
+  \textbf{Sales Development agent} (more autonomous):
+  \begin{itemize}
+    \item Two-way conversations with prospects
+    \item Qualification + meeting scheduling end-to-end
+    \item Most-autonomous offering Microsoft has shipped for sales
+  \end{itemize}
+
+  \vfill
+  \begin{alertblock}{For regulated FS contexts}
+    Treat these as \hl{forward-looking}. The audit-trail and compliance work they demand is non-trivial.
+  \end{alertblock}
+\end{frame}
+
+% =============================================================================
+\section{FS fit}
+
+\begin{frame}{Where Sales agent fits in FS --- strong fit}
+  \centering\footnotesize
+  \begin{tabular}{lp{0.55\textwidth}}
+    \toprule
+    \textbf{FS segment} & \textbf{Why} \\
+    \midrule
+    Wealth mgmt / private banking distribution & Client-by-client sales motion, CRM-tracked relationships \\
+    Asset mgmt institutional distribution      & Selling funds / mandates to RIAs, pensions, family offices \\
+    Commercial banking RMs                     & Multi-product cross-sell to corporate clients; CRM is the OS \\
+    Insurance distribution (broker / agent)    & Per-customer policy structuring + renewal cycle \\
+    Capital markets sales (DCM / ECM origination) & Account-coverage workflow exists --- soft fit \\
+    \bottomrule
+  \end{tabular}
+
+  \vfill
+  \raggedright The common shape: \hl{a known customer, in a CRM, with a multi-touch sales cycle}.
+\end{frame}
+
+\begin{frame}{Where Sales agent does NOT fit in FS}
+  \centering\footnotesize
+  \begin{tabular}{lp{0.55\textwidth}}
+    \toprule
+    \textbf{FS segment} & \textbf{Why it doesn't fit} \\
+    \midrule
+    Investment banking advisory (M\&A pitchbooks) & Sales agent's ``pitch'' = 1 slide + Word; IB pitchbooks = 30--50 slides of comps, DCF, precedents \\
+    Trading / market-making / execution           & No ``named-account sales motion''; the work is execution \\
+    Research analysts                             & Output is for many subscribers, not tailored proposals \\
+    Quant / strats / risk modelling               & Quantitative work; no CRM-driven workflow \\
+    Risk / treasury / ALM                         & Internal-facing analytical work \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{A precise way to say it}
+  \begin{exampleblock}{}
+    \textit{Sales agent fits the parts of FS where the operating system is the \hl{CRM} and the deliverable is a \hl{per-customer pitch or proposal}.}
+
+    \medskip
+    \textit{It does not fit the parts of FS where the operating system is \hl{Excel + market data terminals} and the deliverable is an \hl{analytical artifact}.}
+  \end{exampleblock}
+
+  \vfill
+  In a universal bank:
+  \begin{itemize}
+    \item \good\ wealth, AM distribution, commercial banking, insurance distribution
+    \item \bad\ IB advisory, trading, research, quant
+  \end{itemize}
+\end{frame}
+
+% =============================================================================
+\section{Our access situation}
+
+\begin{frame}{What we know about our access}
+  \textbf{We know we have:} M365 Copilot.
+
+  \medskip
+  \textbf{We do NOT know:} whether Sales agent is admin-installed in our tenant. The two are related but \hl{not equivalent}.
+
+  \medskip
+  Common scenarios:
+  \begin{itemize}
+    \item M365 Copilot but no CRM $\rightarrow$ Sales agent unusable.
+    \item M365 Copilot + CRM but no admin install $\rightarrow$ Sales agent unavailable.
+    \item M365 Copilot + CRM + install, only some users licensed $\rightarrow$ most colleagues won't see it.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Four checks to run before claiming access either way}
+  \begin{enumerate}
+    \item \textbf{Is Sales agent installed?}\\
+       Look for the \textit{Sales} pane in Outlook (sidebar) and \textit{Sales} app in Teams (left nav). Absent on a sample of seats $\rightarrow$ not installed.
+    \item \textbf{What CRM do we use?}\\
+       Salesforce or Dynamics 365 Sales $\rightarrow$ supportable. Proprietary / Murex client / Bloomberg AIM / internal CRM $\rightarrow$ not supported out of the box.
+    \item \textbf{What's our cloud?}\\
+       GCC, GCC High, DoD, sovereign cloud $\rightarrow$ \hl{not supported}. EU public cloud $\rightarrow$ supported.
+    \item \textbf{What's our subscription posture?}\\
+       M365 Copilot licences are per-user. Only the subset with M365 Copilot \textit{could} use Sales agent.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{What to tell colleagues asking ``can we use it today?''}
+  \begin{exampleblock}{Clean answer}
+    \small \textit{``We have M365 Copilot, but Sales agent is a separate add-on --- it requires admin install and a CRM connection (Dynamics 365 Sales or Salesforce). We need to confirm with IT whether Sales agent is enabled in the tenant and whether our CRM is one it supports.}
+
+    \medskip
+    \textit{If both are true, the strongest fit in our context is [wealth / AM distribution / commercial banking / insurance --- pick the segment]. It is \hl{not} the right tool for IB pitchbooks or trading workflows.''}
+  \end{exampleblock}
+\end{frame}
+
+% =============================================================================
+\section{Summary}
+
+\begin{frame}{Comparison --- the alternatives for FS pitch work}
+  \centering\footnotesize
+  \begin{tabular}{lccc}
+    \toprule
+    \textbf{Capability} & \textbf{M365 Copilot} & \textbf{M365 Sales agent} & \textbf{Claude FS Pitch Builder} \\
+    \midrule
+    CRM grounding                          & \bad        & \good\ (D365 / SF) & \bad \\
+    B2B pitch (1 slide + proposal)         & Partial     & \good        & Partial \\
+    IB pitchbook (comps, DCF, precedents)  & \bad        & \bad         & \good \\
+    Lead research + autonomous outreach    & \bad        & \good\ (preview) & \bad \\
+    Meeting prep with CRM context          & \bad        & \good        & \bad \\
+    Excel-deep modelling                   & Partial     & Partial      & \good \\
+    Long-context document synthesis        & Limited     & Limited      & \good \\
+    \midrule
+    \textbf{Our office access today}       & \good       & \textbf{?}\ verify & \bad \\
+    \bottomrule
+  \end{tabular}
+
+  \vfill
+  \raggedright \small \hl{No single tool covers every pitch shape in FS.} Sales agent covers distribution / RM / wealth pitches; Claude FS covers IB advisory pitches; nothing covers both.
+\end{frame}
+
+\begin{frame}{Recommended next steps}
+  \begin{enumerate}
+    \item \textbf{Confirm with IT}: is Sales agent admin-installed in our tenant? (~5-min email)
+    \item \textbf{Confirm the CRM}: which one the office uses; is it one Sales agent supports?
+    \item \textbf{If yes on both}: pilot the customised-pitch workflow on a real non-sensitive opportunity. Assess if output quality justifies wider rollout.
+    \item \textbf{If no on either}: nothing more to do. The brief documents what Sales agent is so people asking get an accurate answer.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item Sales agent is a \hl{separate product}, not a feature of M365 Copilot. Needs licence + admin install + CRM.
+    \item ``Pitch'' in Sales agent = \hl{B2B sales pitch} (1 slide + Word proposal), not IB pitchbook.
+    \item \textbf{Strong FS fit}: wealth, AM distribution, commercial banking, insurance.
+    \item \textbf{Poor FS fit}: IB advisory, trading, research, quant.
+    \item \textbf{Hard exclusions}: GCC / GCC High / DoD / sovereign clouds; on-premise CRM.
+    \item \textbf{Our access}: \hl{unknown} until we run the four checks with IT.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Supporting materials}
+  Everything in this talk is documented in the team folder:
+  \begin{itemize}
+    \item \texttt{01-what-it-is.md} --- factual picture of the product
+    \item \texttt{02-scope-and-use-cases.md} --- four groups of use cases, including the 6-step pitch workflow
+    \item \texttt{03-fs-fit-and-our-access.md} --- the honest FS-fit assessment + checks to run
+    \item \texttt{appendix-sources.md} --- every claim, sourced to Microsoft Learn
+  \end{itemize}
+\end{frame}
+
+% =============================================================================
+\begin{frame}[plain]
+  \begin{center}
+    {\Huge Thank you}\\[1.2em]
+    {\Large Questions?}\\[2.4em]
+    \small \textit{Verified June 2026 against learn.microsoft.com / adoption.microsoft.com.}
+  \end{center}
+\end{frame}
+
+\end{document}

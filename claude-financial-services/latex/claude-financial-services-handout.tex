@@ -1,0 +1,247 @@
+% =============================================================================
+% Claude for Financial Services — 2-page A4 handout
+% Audience leave-behind. Printable. Single column for readability.
+%
+% Compile:
+%   latexmk -pdf -xelatex claude-financial-services-handout.tex
+% =============================================================================
+\documentclass[10pt,a4paper]{article}
+
+% --- Geometry & spacing ------------------------------------------------------
+\usepackage[a4paper,margin=15mm,top=12mm,bottom=12mm]{geometry}
+\usepackage{parskip}
+\setlength{\parskip}{4pt plus 1pt}
+\pagestyle{empty}
+
+% --- Encoding & fonts --------------------------------------------------------
+\usepackage[english]{babel}
+\usepackage{microtype}
+\usepackage{fontspec}
+\usepackage{amssymb}     % \checkmark
+
+% --- Colour palette (matches the decks) --------------------------------------
+\usepackage{xcolor}
+\definecolor{accentpurple}{HTML}{7C3AED}
+\definecolor{darkgray}{HTML}{1F2937}
+\definecolor{lightgray}{HTML}{F3F4F6}
+\definecolor{successgreen}{HTML}{059669}
+\definecolor{warningred}{HTML}{DC2626}
+
+% --- Boxes for callouts ------------------------------------------------------
+\usepackage[most]{tcolorbox}
+\tcbset{
+  boxrule=0pt,
+  arc=2pt,
+  left=6pt,right=6pt,top=4pt,bottom=4pt,
+  boxsep=2pt,
+  fonttitle=\bfseries\small,
+}
+\newtcolorbox{callout}[1][]{colback=lightgray, colframe=lightgray, #1}
+\newtcolorbox{accentbox}[1][]{colback=lightgray, colframe=accentpurple, boxrule=1.2pt, leftrule=3pt, #1}
+
+% --- Tables ------------------------------------------------------------------
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+
+% --- Section headers ---------------------------------------------------------
+\usepackage{titlesec}
+\titleformat{\section}
+  {\color{accentpurple}\bfseries\large}
+  {}{0pt}{}
+  [\vspace{-6pt}\noindent\color{accentpurple}\rule{\textwidth}{0.6pt}]
+\titlespacing*{\section}{0pt}{8pt}{4pt}
+\titleformat{\subsection}
+  {\color{darkgray}\bfseries\normalsize}
+  {}{0pt}{}
+\titlespacing*{\subsection}{0pt}{4pt}{2pt}
+
+% --- Helpers -----------------------------------------------------------------
+\newcommand{\good}{\textcolor{successgreen}{\textbf{\checkmark}}}
+\newcommand{\bad}{\textcolor{warningred}{\textbf{\texttimes}}}
+\newcommand{\hl}[1]{\textbf{\textcolor{accentpurple}{#1}}}
+
+% --- Tighter list spacing ----------------------------------------------------
+\usepackage{enumitem}
+\setlist{nosep, leftmargin=*, topsep=2pt, itemsep=1pt}
+
+% --- Hyperlinks --------------------------------------------------------------
+\usepackage{hyperref}
+\hypersetup{hidelinks, pdftitle={Claude for Financial Services — handout}}
+
+% =============================================================================
+\begin{document}
+
+% --- Title bar ---------------------------------------------------------------
+\noindent
+\begin{tcolorbox}[colback=darkgray, colframe=darkgray, fonttitle=\Large\bfseries\color{white}]
+  \color{white}\textbf{\Large Claude for Financial Services} \hfill \small Internal briefing pack \quad\textbar\quad June 2026 \\[2pt]
+  {\small A printable summary of the May 2026 launch, where we stand with it, and what to say when people ask. Drill at your desk.}
+\end{tcolorbox}
+
+% =============================================================================
+\section*{The headline}
+
+On \hl{5 May 2026}, Anthropic launched Claude for Financial Services:
+
+\begin{itemize}
+  \item \textbf{10 ready-to-run agent templates} for high-volume FS workflows
+  \item \textbf{Microsoft 365 integration} — Excel, PowerPoint, Word, Outlook
+  \item \textbf{MCP-based connectors} to $\sim$11 financial data providers (Daloopa, S\&P, Moody's, FactSet, LSEG, PitchBook, $\ldots$)
+  \item \textbf{Enterprise controls} — SSO (SAML/OIDC), SCIM, audit logs, ISO/IEC 42001:2023
+\end{itemize}
+
+\noindent Underlying model: \hl{Claude Opus 4.7}. Benchmark: \hl{64.37\%} on Vals AI Finance Agent (finance-specific eval, current best-in-class).
+
+% =============================================================================
+\section*{The 10 agents}
+
+\begin{tabularx}{\textwidth}{@{}p{0.42\textwidth} X@{}}
+\toprule
+\textbf{Research \& Client Coverage} & \textbf{Finance \& Operations} \\
+\midrule
+\textbf{Pitch Builder} — target lists, comps, pitchbooks & \textbf{Valuation Reviewer} — vs comparables \& firm standards \\
+\textbf{Meeting Preparer} — client/counterparty briefs & \textbf{GL Reconciler} — reconciliation \& NAV \\
+\textbf{Earnings Reviewer} — transcripts → model updates & \textbf{Month-End Closer} — close checklist + reports \\
+\textbf{Model Builder} — models from filings + feeds & \textbf{Statement Auditor} — consistency \& audit-readiness \\
+\textbf{Market Researcher} — sector/issuer intel & \textbf{KYC Screener} — entity files + escalations \\
+\bottomrule
+\end{tabularx}
+
+\smallskip
+\noindent\textit{\small Each template is a bundle of three layers: markdown \textbf{skills} (how a senior banker does this), MCP \textbf{connectors} (scoped data access), and addressable \textbf{subagents}. Inspectable, not a black box.}
+
+% =============================================================================
+\section*{How it ships --- three access paths}
+
+\begin{tabularx}{\textwidth}{@{}lXl@{}}
+\toprule
+\textbf{Path} & \textbf{What you get} & \textbf{Requires} \\
+\midrule
+A. M365 + Cowork  & Claude inside Excel/PPT/Word/Outlook + the 10 FS agents     & Claude Team / Enterprise + M365 admin install \\
+B. Claude Code    & Agents from terminal / scripted context                     & Claude Code subscription \\
+C. Managed Agents & Programmatic, autonomous, behind your workflow engine       & Anthropic API access (org) + engineering \\
+\bottomrule
+\end{tabularx}
+
+\smallskip
+\noindent\textit{\small Path A note: the M365 add-in can be deployed against your firm's own cloud (Vertex AI, Bedrock, internal LLM gateway) via the \texttt{claude-for-msft-365-install} Claude Code plugin — traffic then stays in your cloud, compliance posture is whatever you already have for that cloud.}
+
+% =============================================================================
+\section*{Where we stand}
+
+\begin{tabularx}{\textwidth}{@{}X X@{}}
+\toprule
+\textbf{Have} & \textbf{Don't have} \\
+\midrule
+\good\ Microsoft 365 Copilot           & \bad\ Claude.ai (consumer) \\
+\good\ GitHub Copilot                  & \bad\ Claude Team / Enterprise \\
+                                       & \bad\ Claude for M365 (Excel/PPT/Word/Outlook plugin) \\
+                                       & \bad\ Claude Cowork \\
+                                       & \bad\ Claude Code \\
+                                       & \bad\ Anthropic API (org-level) \\
+\bottomrule
+\end{tabularx}
+
+\smallskip
+\noindent\hl{No path} from M365 Copilot or GitHub Copilot to the Claude FS agents. The two product families are entirely separate.
+
+% --- footer page 1 -----------------------------------------------------------
+\vfill
+\noindent{\footnotesize\color{darkgray}\textit{Verified 2026-06-08 against \texttt{anthropic.com/news/finance-agents}, \texttt{claude.com/solutions/financial-services}, and \texttt{github.com/anthropics/financial-services}. \hfill Page 1 of 2}}
+
+\newpage
+
+% =============================================================================
+\section*{What to tell colleagues}
+
+\begin{accentbox}
+\textit{``Yes --- Anthropic launched Claude for Financial Services in May. It's a strong product for our type of work, but we don't have a sanctioned channel to use it: our office AI tooling today is Microsoft 365 Copilot and GitHub Copilot, and Claude requires a separate subscription we haven't acquired.''}
+\end{accentbox}
+
+\smallskip
+\noindent If they push --- \textit{``can I just use my personal account?''}:
+
+\begin{accentbox}
+\textit{``Not on office data, no --- that would be a data-handling issue regardless of how useful the output is. Personal Claude is fine for personal exploration; office work goes through office-sanctioned tools.''}
+\end{accentbox}
+
+% =============================================================================
+\section*{Personal accounts --- the boundary}
+
+\begin{callout}
+A personal Claude subscription is \hl{not} a sanctioned channel for office work. No DPA with our firm; no audit logging into our compliance posture; default Anthropic retention (not enterprise zero-retention). \textbf{Personal Claude is for personal exploration. Office work goes through office-sanctioned tools.} True regardless of how useful the output looks.
+\end{callout}
+
+% =============================================================================
+\section*{FAQ}
+
+\footnotesize
+\begin{description}[leftmargin=0pt, labelindent=0pt, style=unboxed, font=\bfseries\color{darkgray}]
+\item[Q. So can we get it?]
+A: That's a procurement \& compliance conversation, not this one. Worth raising with whoever owns AI tooling decisions.
+
+\item[Q. Isn't M365 Copilot enough?]
+A: For a large slice, yes. Where it isn't: multi-doc synthesis, citation discipline, FS-specific connectors. Whether that gap matters is the procurement conversation.
+
+\item[Q. Isn't this just the same model with a coat of paint?]
+A: Partly fair. Underlying model is Claude Opus 4.7 (same as raw API). What's added: bundled FS templates, FS data connectors, M365 plugins, enterprise controls. Four things not trivial to assemble yourself.
+
+\item[Q. Personal accounts on personal time?]
+A: Personal data, personal projects --- fine. Office data through office tooling. Same rule as any external AI service.
+
+\item[Q. Should we switch to Claude for Excel?]
+A: On the FMW benchmark, Claude leads at 83\%. But that's a snapshot; Copilot is improving. ``Should we switch'' is the procurement conversation. Today we use what we have.
+
+\item[Q. Can we run the demo template on our data?]
+A: No. Public data only, in a personal Cowork instance, for demonstration. European banks, Microsoft, Apple --- fine. Office data --- not appropriate.
+
+\item[Q. Couldn't we just clone the GitHub repo and self-host?]
+A: The repo is Apache 2.0, but the orchestrator is Claude itself, which only runs via paid Anthropic surfaces (or BYOC on Vertex/Bedrock). Plus: data connectors require paid data subscriptions; templates are generic (firm-specific tuning is the 80\%). Free to read; not free to run.
+
+\item[Q. Big Four --- Deloitte, PwC, KPMG, EY?]
+A: All four announced internal Claude rollouts: PwC and KPMG in mid-May, Deloitte in late 2025, EY in late-May. Whether they're packaging FS consulting around it externally is less clear --- partnership conversation, not a tooling one.
+
+\item[Q. Isn't sending Excel data to an external AI service the dealbreaker?]
+A: Out of the box, that's where traffic goes. But the M365 add-in can be deployed via the \texttt{claude-for-msft-365-install} plugin against your firm's own cloud (Vertex / Bedrock / internal gateway). Data path becomes Excel → your cloud → Claude on your cloud → back.
+
+\item[Q. I think we should buy it.]
+A: Good. Right venue is whoever owns AI tooling decisions here. This pack is the briefing they'll need.
+\end{description}
+\normalsize
+
+% =============================================================================
+\section*{Further reading}
+
+\subsection*{The team folder}
+\footnotesize
+\begin{itemize}
+  \item \texttt{01-what-it-is.md} --- the offering in detail
+  \item \texttt{02-how-it-ships.md} --- subscription tiers, deployment paths, BYOC routing
+  \item \texttt{03-our-access-situation.md} --- the honest articulation of where we stand
+  \item \texttt{04-what-we-can-do-today.md} --- pragmatic guidance with M365 + GitHub Copilot
+  \item \texttt{demos/01-sector-overview.md} --- prompt template to run the Market Researcher agent on a public sector (e.g.\ European banks) in personal Cowork
+  \item \texttt{appendix-sources.md} --- every claim, sourced; videos; what we did NOT verify
+\end{itemize}
+
+\subsection*{Videos (May 2026 launch)}
+\begin{itemize}
+  \item \textbf{The Briefing: Financial Services} (Anthropic event, 5 May 2026, 1.5h) --- the launch event itself.\\
+        \texttt{anthropic.com/events/the-briefing-financial-services-virtual-event}
+  \item \textbf{Claude for FS: Putting agents to work} (webinar, 7 May 2026, with demos).\\
+        \texttt{anthropic.com/webinars/claude-for-financial-services-putting-agents-to-work}
+  \item \textbf{Claude for FS teams --- on-demand recording} (59 min, Nick Lynn + Owen Scully) --- best single resource.\\
+        \texttt{anthropic.ondemand.goldcast.io/on-demand/74ae0fc7-f591-442f-8fe1-244f409c1fb5}
+\end{itemize}
+
+\subsection*{Open-source repo (Apache 2.0)}
+\begin{itemize}
+  \item \texttt{github.com/anthropics/financial-services} --- skills, agents, MCP connectors, the \texttt{claude-for-msft-365-install} BYOC plugin. Free to read; running anything still requires paid Anthropic surfaces or BYOC on Vertex / Bedrock.
+\end{itemize}
+\normalsize
+
+% --- footer page 2 -----------------------------------------------------------
+\vfill
+\noindent{\footnotesize\color{darkgray}\textit{Verified 2026-06-08. \hfill Page 2 of 2}}
+
+\end{document}
