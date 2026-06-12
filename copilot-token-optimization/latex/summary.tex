@@ -64,15 +64,15 @@
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 
 % =============================================================================
-\title{\color{darkgray}GitHub Copilot --- Token \& Cost Optimization\\
-       {\large\color{accentblue}Summary Note}}
+\title{\color{darkgray}GitHub Copilot under Token-Based Billing\\
+       {\large\color{accentblue}A Practical Guide}}
 \author{Bernardo Cohen}
 \date{June 2026}
 
 \begin{document}
 \maketitle
 
-\noindent\textbf{Purpose.} GitHub replaced Copilot's old premium-request system with a token-based one on 1~June 2026. The cost of a chat turn is no longer fixed: it now scales with attached context, conversation history, and the model picked. This note distils the full pack into a single read so the office can budget the new pricing without losing the productivity gains we already get from Copilot. Pin \texttt{04-cheatsheet.md} for day-to-day reference; come back here when you want the reasoning.
+\noindent\textbf{Purpose.} GitHub replaced Copilot's premium-request system with a token-based one on 1~June 2026. A chat turn no longer has a fixed cost: it now scales with the model you pick, the context you attach, the conversation history that replays each turn, and (in Agent mode) every tool output the loop has accumulated. The cost spread between best-case and worst-case use of the same feature is one to two orders of magnitude. This guide is the single document to read end-to-end so the office can budget the new pricing without losing the productivity gains Copilot already delivers --- and so we can defend the budget without retreating from the tool.
 
 \tableofcontents
 \vspace{1em}
@@ -116,6 +116,17 @@ Copilot Enterprise (per seat)  & \$39           & \$39 \\
 \end{table}
 
 Overage is purchasable on paid plans, subject to admin policy --- confirm with whoever owns the org contract whether overage spending is enabled or capped.
+
+% =============================================================================
+\section{Why this matters}\label{sec:why}
+
+A realistic Agent-mode session on a premium model spends \textbf{\$0.50 to \$5+} of credits. Public reports document developers burning \textbf{\$30--\$40 in a single morning} on long agentic sessions that recursed through tests and fixes. Pro is \$10 per month. The arithmetic is unforgiving if Copilot is used casually.
+
+\medskip
+\noindent\textbf{The good news.} The highest-frequency Copilot interactions --- inline completion and Next Edit Suggestions --- remain \textbf{unmetered}. Most of the productivity we get from Copilot lives in the free lane. The optimisations in this document are about preserving that lane's value while spending dramatically less on the paid lane.
+
+\medskip
+\noindent\textbf{The thesis.} Copilot's per-turn cost is now a function of choices the user makes (which model, what context, how long the chat). Once those choices are deliberate rather than reflexive, \emph{individual} bills typically drop 50--80\% with no loss of output quality --- and often with a gain, because the same discipline that produces cheaper turns produces better-shaped prompts.
 
 % =============================================================================
 \section{Where the money actually goes --- the five surfaces}\label{sec:surfaces}
@@ -170,7 +181,21 @@ Two facts worth internalising:
 \section{The four levers, in priority order}\label{sec:levers}
 
 \begin{enumerate}[label=\textbf{\arabic*.}]
-  \item \textbf{Model choice.} A 10--40$\times$ spread between the cheapest models (Haiku 4.5, GPT-5 mini, Gemini 3 Flash, Raptor mini) and the premium tier (Opus 4.7/4.8, GPT-5.5). For routine work the \emph{quality} gap is usually negligible.
+  \item \textbf{Model choice.} A 10--40$\times$ spread between the cheapest and the most premium models. For routine work the \emph{quality} gap is usually negligible.
+
+  \begin{table}[h]
+  \centering\footnotesize
+  \begin{tabular}{@{}L{1.6cm}L{4.8cm}L{6.6cm}@{}}
+  \toprule
+  \textbf{Tier} & \textbf{Examples} & \textbf{When to use} \\
+  \midrule
+  Cheap    & Haiku 4.5, GPT-5 mini, Gemini 3 Flash, Raptor mini & Exploration, ``what does this do'', summarising, planning, simple edits \\
+  Standard & Sonnet 4.6, GPT-5.4, Gemini 3.1 Pro, MAI-Code-1-Flash & Multi-file edits, careful implementation, code review of a tricky diff \\
+  Premium  & Opus 4.7 / 4.8, GPT-5.5, large-context GPT-5.4 / Gemini 3.1 Pro & Hard reasoning, debugging across a large codebase, architectural design \\
+  \bottomrule
+  \end{tabular}
+  \caption{Model tiers and where each earns its keep. Action: set the default chat model in VS Code to a cheap-tier model; escalate deliberately.}
+  \end{table}
 
   \item \textbf{Tool-output history} (agent mode only --- but dominant there). Shorter sessions, fresh chats per task, don't re-purpose a 30-turn agent context.
 
@@ -207,6 +232,43 @@ The strongest single habit you can build:
 \noindent\textbf{Framing.} Premium models execute \emph{locked} decisions; cheap models explore \emph{undecided} ones. Reversing this is the most common way to burn the budget.
 
 % =============================================================================
+\section{Worked examples}\label{sec:worked}
+
+\subsection*{Prompt-chipping vs.\ one good brief}
+
+\noindent\textbf{Anti-pattern} --- four turns, four bills, each carrying the entire prior history:
+
+\begin{lstlisting}
+Turn 1: "Refactor this to use a dict."
+Turn 2: "Actually use defaultdict."
+Turn 3: "Make the keys strings."
+Turn 4: "Add type hints."
+\end{lstlisting}
+
+\noindent\textbf{Pattern} --- one complete brief, one turn, one bill:
+
+\begin{lstlisting}
+"Refactor this to use a collections.defaultdict[str, list[Foo]],
+ add type hints, and keep the existing public signature."
+\end{lstlisting}
+
+\noindent The discipline that produces the cheaper version is the same discipline that produces better output. The two reinforce each other.
+
+\subsection*{Reusable context lives in files, not chats}
+
+If you find yourself re-pasting ``remember, we follow X convention'' into every chat, move it into a file Copilot auto-loads. At the repo root, create \texttt{.github/copilot-instructions.md}:
+
+\begin{lstlisting}
+- Python 3.12, type hints required on all public functions.
+- No bare `except`. Use specific exception types.
+- SQLAlchemy 2.x -- no Query API; use select().
+- Tests live in `tests/`, one file per source module.
+- Plotting through internal pricebook.viz only -- never raw matplotlib.
+\end{lstlisting}
+
+\noindent Copilot loads this on every chat in that repo. The tokens are included in every turn's input but are typically eligible for cached-input pricing (10$\times$ cheaper than fresh input), and you stop re-explaining the same conventions across chats. For repeated task shapes, drop \texttt{.github/prompts/<name>.prompt.md} files for things like ``write unit tests for the selected function in our test style'' and invoke them as one-liners.
+
+% =============================================================================
 \section{Anti-patterns --- stop doing this}\label{sec:antipatterns}
 
 \begin{itemize}
@@ -233,7 +295,9 @@ Definition of  <how the agent knows to stop --- tests pass?
 At the end:    <summarise files touched + assumptions made>.
 \end{lstlisting}
 
-\paragraph{Concrete example.}
+\smallskip
+\noindent\textbf{Concrete example.}
+\par\nobreak\smallskip
 
 \begin{lstlisting}
 Task:          Add /health endpoint to user-service returning
@@ -254,7 +318,6 @@ All of these cost nothing and all save credits.
 \begin{itemize}
   \item \yes~Set the default chat model to \textbf{Haiku 4.5} or \textbf{GPT-5 mini} in VS Code settings.
   \item \yes~Create \texttt{.github/copilot-instructions.md} in every active repo with your team conventions (auto-loaded, cache-eligible).
-  \item \yes~Pin the cheatsheet (\texttt{04-cheatsheet.md}) next to your monitor or in an editor split.
   \item \yes~Bind a keyboard shortcut to \textbf{New chat} so starting fresh is one keystroke.
   \item \yes~Glance at the \textbf{token counter} (bottom-right of the chat panel) before any turn that already has $>$30K context.
   \item \yes~Stop dragging folders into chat. Always \texttt{\#file:} or \texttt{@workspace}.
@@ -266,6 +329,44 @@ All of these cost nothing and all save credits.
   \item 30--80K: getting expensive on premium models; consider cutting losses if circling.
   \item 80K+: very expensive per turn. Stop, summarise, start fresh.
 \end{itemize}
+
+% =============================================================================
+\section{What you are trading}\label{sec:trading}
+
+Each of the habits above feels like upfront work. The trade is \textbf{upfront thinking} against \textbf{downstream burn}.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{@{}L{6.5cm}r@{}}
+\toprule
+\textbf{Habit} & \textbf{Cost} \\
+\midrule
+Writing a complete prompt instead of chipping at it & $+$1 min thinking \\
+Switching models mid-task                            & $+$5 sec of clicks \\
+Starting a new chat per topic                        & $+$2 sec \\
+Front-loading an agent brief                         & $+$1--2 min thinking \\
+\midrule
+\textbf{Effect on credit burn}                       & \textcolor{successgreen}{\textbf{$-50\%$ to $-80\%$ typical}} \\
+\textbf{Effect on output quality}                    & Usually meaningfully better \\
+\textbf{Effect on rework}                            & Lower \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+If a habit doesn't improve quality, it's still saving money. If it does both, it's a free upgrade.
+
+% =============================================================================
+\section{The five rules}\label{sec:rules}
+
+If you internalise only five things from this guide, internalise these.
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Free is free.} Code completion and Next Edit Suggestions don't bill. Default to them whenever the task is shaped like ``complete this code''.
+  \item \textbf{Cheap model first.} Explore on Haiku 4.5 or GPT-5 mini; escalate to a premium model only to execute a locked plan.
+  \item \textbf{Attach less.} \texttt{\#selection} before \texttt{\#editor} before \texttt{\#file:} before \texttt{@workspace}. Never drag a folder.
+  \item \textbf{One task $=$ one chat.} New chat per topic change. Long-running chats inflate every subsequent turn's input.
+  \item \textbf{Agent mode is high-stakes mode.} Front-load the brief, set a Definition of Done, and don't re-purpose a stale agent session.
+\end{enumerate}
 
 % =============================================================================
 \appendix

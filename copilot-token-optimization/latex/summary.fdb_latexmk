@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1781255154.5046 "summary.tex" "summary.pdf" "summary" 1781255154.96287 0
+["pdflatex"] 1781256276.59476 "summary.tex" "summary.pdf" "summary" 1781256277.36898 0
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1136849721 2971 def0b6c1f0b107b3b936def894055589 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -131,10 +131,10 @@
   "/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1780899717 5573038 b99aad5e4898a9034e953632f940512b ""
   "/usr/local/texlive/2026/texmf-var/web2c/pdftex/pdflatex.fmt" 1780899713 3636769 29bdca1b283b53aa8df38450f2e193fb ""
   "/usr/local/texlive/2026/texmf.cnf" 1774209515 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
-  "summary.aux" 1781255154.8904 3702 63b7bea95333d5735241ff3675333639 "pdflatex"
-  "summary.out" 1781255154.89101 2037 1f5878b2d92d96e7fd6cf7142c7d63af "pdflatex"
-  "summary.tex" 1781255132.25574 19059 73e6c855cdd48dab9951ea970d5b35d5 ""
-  "summary.toc" 1781255154.89116 1109 7a8344227833bd1cfc7ea1739f003413 "pdflatex"
+  "summary.aux" 1781256277.23409 4803 e987744eb80b4b3f733b50e8bd60426d "pdflatex"
+  "summary.out" 1781256277.23479 2565 28e12e89ca82f36b24834c43b33c7e4f "pdflatex"
+  "summary.tex" 1781256206.01706 24994 9657612e80864bda983ba971bbd6e607 ""
+  "summary.toc" 1781256277.23494 1341 e75bb0acda4d62d9a8f82be7e65c2b61 "pdflatex"
   (generated)
   "summary.aux"
   "summary.log"

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.6.8)  12 JUN 2026 10:05
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.6.8)  12 JUN 2026 10:24
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -563,46 +563,49 @@ Package hyperref Info: Link coloring ON on input line 72.
 \@outlinefile=\write3
 \openout3 = `summary.out'.
 
-Package microtype Info: Loading generic protrusion settings for font family
-(microtype)             `cmtt' (encoding: T1).
-(microtype)             For optimal results, create family-specific settings.
-(microtype)             See the microtype manual for details.
  (./summary.toc)
 \tf@toc=\write4
 \openout4 = `summary.toc'.
 
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[1
+ [1
 
 {/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/loc
 al/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}]
-[2{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc
-}] [3] [4]
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[5] [6] (./summary.aux)
+[2]
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `cmtt' (encoding: T1).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
+[3{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc
+}] [4] [5] [6]
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[7] [8] (./summary.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
 Package rerunfilecheck Info: File `summary.out' has not changed.
-(rerunfilecheck)             Checksum: 1F5878B2D92D96E7FD6CF7142C7D63AF;2037.
+(rerunfilecheck)             Checksum: 28E12E89CA82F36B24834C43B33C7E4F;2565.
  ) 
 Here is how much of TeX's memory you used:
- 17277 strings out of 467525
- 280468 string characters out of 5418983
- 943931 words of memory out of 5000000
- 45810 multiletter control sequences out of 15000+600000
- 651127 words of font info for 152 fonts, out of 8000000 for 9000
+ 17332 strings out of 467525
+ 281074 string characters out of 5418983
+ 924931 words of memory out of 5000000
+ 45822 multiletter control sequences out of 15000+600000
+ 651791 words of font info for 161 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 69i,12n,79p,1196b,1126s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 69i,12n,79p,1196b,2029s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb
 ></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></
@@ -624,10 +627,10 @@ f-dist/fonts/type1/public/cm-super/sfti1095.pfb></usr/local/texlive/2026/texmf-
 dist/fonts/type1/public/cm-super/sftt1000.pfb></usr/local/texlive/2026/texmf-di
 st/fonts/type1/public/cm-super/sftt1095.pfb></usr/local/texlive/2026/texmf-dist
 /fonts/type1/urw/zapfding/uzdr.pfb>
-Output written on summary.pdf (6 pages, 419052 bytes).
+Output written on summary.pdf (8 pages, 434329 bytes).
 PDF statistics:
- 261 PDF objects out of 1000 (max. 8388607)
- 207 compressed objects within 3 object streams
- 57 named destinations out of 1000 (max. 500000)
- 48721 words of extra memory for PDF output out of 51595 (max. 10000000)
+ 315 PDF objects out of 1000 (max. 8388607)
+ 259 compressed objects within 3 object streams
+ 82 named destinations out of 1000 (max. 500000)
+ 48753 words of extra memory for PDF output out of 51595 (max. 10000000)
 
