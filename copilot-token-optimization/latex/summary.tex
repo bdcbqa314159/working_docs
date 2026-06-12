@@ -1,0 +1,375 @@
+% =============================================================================
+% GitHub Copilot --- Token & Cost Optimization: Summary Note
+% Sibling to the beamer deck copilot-token-optimization.tex.
+% Compile: latexmk -pdf summary.tex   (or pdflatex summary.tex, twice for TOC)
+% =============================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{amsmath}
+
+% --- Palette (matches the beamer deck) ---------------------------------------
+\usepackage{xcolor}
+\definecolor{accentblue}{HTML}{2563EB}
+\definecolor{darkgray}{HTML}{1F2937}
+\definecolor{lightgray}{HTML}{F3F4F6}
+\definecolor{successgreen}{HTML}{059669}
+\definecolor{warningred}{HTML}{DC2626}
+
+% --- Tables, lists, code -----------------------------------------------------
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\setlist{itemsep=2pt,topsep=4pt}
+\usepackage{listings}
+\lstdefinestyle{brief}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{lightgray},
+  frame=single,
+  rulecolor=\color{darkgray!30},
+  framesep=6pt,
+  xleftmargin=8pt,
+  framexleftmargin=8pt,
+  breaklines=true,
+  showstringspaces=false,
+  columns=fullflexible,
+  literate={→}{{$\rightarrow$}}1
+           {≪}{{$\ll$}}1
+           {↓}{{$\downarrow$}}1
+}
+\lstset{style=brief}
+
+% --- Section titles in accent colour -----------------------------------------
+\usepackage{titlesec}
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{accentblue}}{\thesection}{0.6em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{darkgray}}{\thesubsection}{0.5em}{}
+
+% --- Refs --------------------------------------------------------------------
+\usepackage[colorlinks=true,linkcolor=accentblue,urlcolor=accentblue,citecolor=accentblue]{hyperref}
+\usepackage[capitalize,noabbrev]{cleveref}
+
+% --- Custom check/cross marks ------------------------------------------------
+\newcommand{\yes}{\textcolor{successgreen}{\ding{51}}}
+\newcommand{\no}{\textcolor{warningred}{\ding{55}}}
+\usepackage{pifont}
+
+% --- Tighter table column types ----------------------------------------------
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% =============================================================================
+\title{\color{darkgray}GitHub Copilot --- Token \& Cost Optimization\\
+       {\large\color{accentblue}Summary Note}}
+\author{Bernardo Cohen}
+\date{June 2026}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Purpose.} GitHub replaced Copilot's old premium-request system with a token-based one on 1~June 2026. The cost of a chat turn is no longer fixed: it now scales with attached context, conversation history, and the model picked. This note distils the full pack into a single read so the office can budget the new pricing without losing the productivity gains we already get from Copilot. Pin \texttt{04-cheatsheet.md} for day-to-day reference; come back here when you want the reasoning.
+
+\tableofcontents
+\vspace{1em}
+
+% =============================================================================
+\section{What changed on 1 June 2026}\label{sec:whatchanged}
+
+The unit moved from \emph{premium requests} (count of turns $\times$ per-model multiplier, fixed monthly quota) to \emph{AI Credits} (denominated in dollars; $1$ credit $= \$0.01$), billed by tokens consumed times a per-model rate. The same surfaces are paid (chat, edit, agent, code review) and the same surfaces are free (inline completion, Next Edit Suggestions).
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+& \textbf{Old system} & \textbf{New system} \\
+\midrule
+Unit & ``Premium request'' & AI Credit ($1$ credit $=\$0.01$) \\
+What you spend & Counts of requests & Tokens $\times$ per-model price \\
+Plan allowance & $N$ requests / month & \$ in credits / month \\
+Paid surfaces & Chat, edits, agent & \textbf{Same} --- + code review \\
+Still free & Code completion, NES & Code completion, NES \\
+Annual subscribers & --- & Stay on legacy multipliers until renewal \\
+\bottomrule
+\end{tabular}
+\caption{Billing-model migration at a glance.}
+\end{table}
+
+\noindent\textbf{Monthly allowance per plan} (per user, no rollover):
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Plan} & \textbf{Monthly price} & \textbf{Monthly AI Credits} \\
+\midrule
+Copilot Pro (individual)       & \$10           & \$10 \\
+Copilot Pro+ (individual)      & \$39           & \$39 \\
+Copilot Business (per seat)    & \$19           & \$19 \\
+Copilot Enterprise (per seat)  & \$39           & \$39 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Overage is purchasable on paid plans, subject to admin policy --- confirm with whoever owns the org contract whether overage spending is enabled or capped.
+
+% =============================================================================
+\section{Where the money actually goes --- the five surfaces}\label{sec:surfaces}
+
+Copilot in VS~Code is five distinct surfaces with very different cost behaviour. \emph{Knowing which surface you are on is the single biggest determinant of how fast your credits drain.}
+
+\begin{table}[h]
+\centering\footnotesize
+\begin{tabular}{@{}L{2.8cm}L{2.8cm}L{1.1cm}L{3.0cm}L{3.0cm}@{}}
+\toprule
+\textbf{Surface} & \textbf{Trigger} & \textbf{Bills?} & \textbf{Tokens per turn} & \textbf{Cost shape} \\
+\midrule
+Code completion & Just type --- ghost text & \textcolor{successgreen}{\textbf{No}} & n/a & Free, unlimited \\
+Next Edit Suggestions & Tab through proposed edits & \textcolor{successgreen}{\textbf{No}} & n/a & Free, unlimited \\
+Chat --- Ask mode & Side panel, plain question & Yes & $\sim$3--15K in, $\sim$0.5--2K out & Small per turn \\
+Chat --- Edit mode & Side panel, ``Edits'' target & Yes & $\sim$10--40K in, $\sim$1--4K out & Medium; $\propto$ files edited \\
+Chat --- Agent mode & Side panel, ``Agent'' + tools & Yes & 50K--500K cumulative & \textbf{Highest} --- loops + tool re-injection \\
+Code Review (PR/inline) & ``Copilot review'' on a PR & Yes & Depends on diff size & Per review, on top of chat \\
+\bottomrule
+\end{tabular}
+\caption{The five surfaces. Free, unlimited inline completion and NES are where most of Copilot's daily value lives --- use them aggressively.}
+\end{table}
+
+\textbf{Agent mode is where budgets vanish.} Each tool call's output (a file you asked it to read, a command result, a test log) gets re-injected into every \emph{subsequent} turn's input. A 20-tool-call session on a premium model routinely accumulates 200K+ input tokens, which is what drove the publicly-reported ``\$30--40 in one morning'' incidents.
+
+% =============================================================================
+\section{The cost equation --- a mental model}\label{sec:equation}
+
+On any paid surface, the per-turn cost decomposes as
+\[
+\text{cost}
+= \underbrace{\bigl(\text{prompt} + \text{context} + \text{history} + \text{tool outputs}\bigr)}_{\text{input tokens}} \cdot\, r_{\text{in}}
++ \underbrace{\bigl(\text{reply} + \text{tool-call args}\bigr)}_{\text{output tokens}} \cdot\, r_{\text{out}}.
+\]
+
+Two facts worth internalising:
+
+\begin{itemize}
+  \item \textbf{Output tokens are 5--6$\times$ more expensive than input} on most models. A whole-file rewrite (Edit mode) is dominated by its output.
+  \item \textbf{Cached input is 10$\times$ cheaper than fresh input} on every model. Re-attaching the same file within a few minutes is nearly free; restarting a chat throws that cache away.
+\end{itemize}
+
+\paragraph{Back-of-envelope conversions} (memorise one of these):
+
+\begin{itemize}
+  \item \emph{Sonnet 4.6, normal chat turn}: $\sim$5K in + $\sim$1K out $= 3$ credits $\Rightarrow$ Pro's \$10 buys $\approx 330$ such turns/month.
+  \item \emph{Opus, heavy refactor turn}: $\sim$30K in + $\sim$3K out $= 22.5$ credits $\Rightarrow$ Pro's \$10 buys $\approx 44$ turns.
+  \item \emph{Agent session, 20 tool calls on Opus}: $\sim$200K cumulative in + $\sim$15K out $= 137.5$ credits $\Rightarrow$ \textbf{one session $\approx 14\%$ of Pro's monthly pool.}
+\end{itemize}
+
+% =============================================================================
+\section{The four levers, in priority order}\label{sec:levers}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Model choice.} A 10--40$\times$ spread between the cheapest models (Haiku 4.5, GPT-5 mini, Gemini 3 Flash, Raptor mini) and the premium tier (Opus 4.7/4.8, GPT-5.5). For routine work the \emph{quality} gap is usually negligible.
+
+  \item \textbf{Tool-output history} (agent mode only --- but dominant there). Shorter sessions, fresh chats per task, don't re-purpose a 30-turn agent context.
+
+  \item \textbf{Attached context size.} Cheapest $\rightarrow$ most expensive:
+    \begin{center}\small\ttfamily
+      typed code in prompt $<$ \#selection $<$ \#editor $<$ \#file:\textit{name} $<$ @workspace / \#codebase $<$ dragged folder
+    \end{center}
+    Dragging a folder into chat can be 10--100$\times$ what you actually needed.
+
+  \item \textbf{Chat history length.} Every prior turn replays as input on the next turn. A 20-turn chat at 5K context/turn sends 100K input tokens on turn 21 --- one expensive turn. New chat per topic change.
+\end{enumerate}
+
+% =============================================================================
+\section{The two-lane workflow}\label{sec:twolane}
+
+The strongest single habit you can build:
+
+\begin{lstlisting}
+                  +----------------------------+
+   EXPLORE  --->  | Cheap lane (Haiku, mini)   |  <-- ask, plan, summarise
+                  +------------+---------------+
+                               | plan locked
+                               v
+                  +----------------------------+
+   EXECUTE  --->  | Premium lane (Sonnet+)     |  <-- one well-formed impl turn
+                  +------------+---------------+
+                               |
+                               v
+                  +----------------------------+
+   VERIFY   --->  | Cheap lane again           |  <-- review diff, write tests
+                  +----------------------------+
+\end{lstlisting}
+
+\noindent\textbf{Framing.} Premium models execute \emph{locked} decisions; cheap models explore \emph{undecided} ones. Reversing this is the most common way to burn the budget.
+
+% =============================================================================
+\section{Anti-patterns --- stop doing this}\label{sec:antipatterns}
+
+\begin{itemize}
+  \item \no~\textbf{Asking yes/no on Opus.} 15--25K of context in plus a few hundred output tokens for a one-word answer is 10--15 credits. Do these on a cheap-lane model --- or just look at the code.
+  \item \no~\textbf{Dragging folders into chat.} You almost never want every file in the folder. Use \texttt{\#file:} or \texttt{@workspace}.
+  \item \no~\textbf{Prompt-chipping}: ``refactor this'' $\rightarrow$ ``actually use defaultdict'' $\rightarrow$ ``now add type hints''. Four turns, four full bills. Write one complete brief.
+  \item \no~\textbf{Re-running PR review on every push.} A Copilot review re-pays the whole diff each time. One review per meaningful change; human review for small follow-ups.
+  \item \no~\textbf{Reusing a 30-turn agent session for a new task.} Old tool outputs are now in every new turn's input.
+  \item \no~\textbf{Defaulting to Agent mode} for things Ask could do. Agent mode is high-stakes, not chat-with-tools.
+\end{itemize}
+
+% =============================================================================
+\section{Agent-mode brief template}\label{sec:brief}
+
+A well-shaped brief routinely cuts agent sessions from 20 turns to 4--6. Open with everything the agent needs to know, in one prompt:
+
+\begin{lstlisting}
+Task:           <one sentence>.
+In scope:       <files / packages>.
+Out of scope:   <what NOT to touch>.
+Constraints:    <patterns to preserve, libs required / forbidden>.
+Definition of  <how the agent knows to stop --- tests pass?
+   Done:        endpoint responds? file exists?>.
+At the end:    <summarise files touched + assumptions made>.
+\end{lstlisting}
+
+\paragraph{Concrete example.}
+
+\begin{lstlisting}
+Task:          Add /health endpoint to user-service returning
+               {status:"ok", db:"ok"|"error"}.
+In scope:      services/user/handlers/, services/user/tests/.
+Out of scope:  any other service, infra config, CI.
+Constraints:   use existing FastAPI patterns; no new dependencies.
+Definition of  endpoint responds correctly, new test_health.py
+   Done:       passes locally.
+At the end:    list files touched + any assumptions made.
+\end{lstlisting}
+
+% =============================================================================
+\section{Quick-wins checklist}\label{sec:quickwins}
+
+All of these cost nothing and all save credits.
+
+\begin{itemize}
+  \item \yes~Set the default chat model to \textbf{Haiku 4.5} or \textbf{GPT-5 mini} in VS Code settings.
+  \item \yes~Create \texttt{.github/copilot-instructions.md} in every active repo with your team conventions (auto-loaded, cache-eligible).
+  \item \yes~Pin the cheatsheet (\texttt{04-cheatsheet.md}) next to your monitor or in an editor split.
+  \item \yes~Bind a keyboard shortcut to \textbf{New chat} so starting fresh is one keystroke.
+  \item \yes~Glance at the \textbf{token counter} (bottom-right of the chat panel) before any turn that already has $>$30K context.
+  \item \yes~Stop dragging folders into chat. Always \texttt{\#file:} or \texttt{@workspace}.
+\end{itemize}
+
+\paragraph{Watch the counter --- thresholds.}
+\begin{itemize}
+  \item Under $\sim$30K tokens: comfortable.
+  \item 30--80K: getting expensive on premium models; consider cutting losses if circling.
+  \item 80K+: very expensive per turn. Stop, summarise, start fresh.
+\end{itemize}
+
+% =============================================================================
+\appendix
+\section{Order-of-magnitude pricing (per 1M tokens, USD)}\label{app:pricing}
+
+Verified June 2026 against the GitHub Copilot \href{https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing}{models-and-pricing reference page}. Numbers move --- re-check before procurement decisions.
+
+\subsection*{OpenAI}
+\begin{table}[h]
+\centering\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Model} & \textbf{Input} & \textbf{Cached input} & \textbf{Output} \\
+\midrule
+GPT-5 mini                  & \$0.25 & \$0.025 & \$2.00 \\
+GPT-5.3-Codex               & \$1.75 & \$0.175 & \$14.00 \\
+GPT-5.4 ($\leq$272K ctx)    & \$2.50 & \$0.25  & \$15.00 \\
+GPT-5.4 ($>$272K ctx)       & \$5.00 & \$0.50  & \$22.50 \\
+GPT-5.4 mini                & \$0.75 & \$0.075 & \$4.50 \\
+GPT-5.4 nano                & \$0.20 & \$0.02  & \$1.25 \\
+GPT-5.5 ($\leq$272K ctx)    & \$5.00 & \$0.50  & \$30.00 \\
+GPT-5.5 ($>$272K ctx)       & \$10.00& \$1.00  & \$45.00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Anthropic}
+\begin{table}[h]
+\centering\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Model} & \textbf{Input} & \textbf{Cached input} & \textbf{Cache write} & \textbf{Output} \\
+\midrule
+Claude Haiku 4.5         & \$1.00 & \$0.10 & \$1.25 & \$5.00 \\
+Claude Sonnet 4 / 4.5 / 4.6 & \$3.00 & \$0.30 & \$3.75 & \$15.00 \\
+Claude Opus 4.5 / 4.6 / 4.7 / 4.8 & \$5.00 & \$0.50 & \$6.25 & \$25.00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Google}
+\begin{table}[h]
+\centering\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Model} & \textbf{Input} & \textbf{Cached input} & \textbf{Output} \\
+\midrule
+Gemini 2.5 Pro                  & \$1.25 & \$0.125 & \$10.00 \\
+Gemini 3 Flash                  & \$0.50 & \$0.05  & \$3.00 \\
+Gemini 3.1 Pro ($\leq$200K ctx) & \$2.00 & \$0.20  & \$12.00 \\
+Gemini 3.1 Pro ($>$200K ctx)    & \$4.00 & \$0.40  & \$18.00 \\
+Gemini 3.5 Flash                & \$1.50 & \$0.15  & \$9.00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Other}
+\begin{table}[h]
+\centering\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Model} & \textbf{Input} & \textbf{Cached input} & \textbf{Output} \\
+\midrule
+Raptor mini       & \$0.25 & \$0.025 & \$2.00 \\
+MAI-Code-1-Flash  & \$0.75 & \$0.075 & \$4.50 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% =============================================================================
+\section{Sources}\label{app:sources}
+
+\subsection*{Primary (official GitHub) --- authoritative}
+\begin{itemize}
+  \item \href{https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing}{Models and pricing for GitHub Copilot} --- the rate card.
+  \item \href{https://github.blog/news-insights/company-news/github-copilot-is-moving-to-usage-based-billing/}{GitHub Blog --- Copilot is moving to usage-based billing} --- effective date, allowances, what stays free.
+  \item \href{https://docs.github.com/en/copilot/get-started/plans}{Plans for GitHub Copilot} --- plan pricing.
+  \item \href{https://code.visualstudio.com/docs/copilot/faq}{VS Code Copilot FAQ}.
+\end{itemize}
+
+\subsection*{Legacy (annual subscribers)}
+\begin{itemize}
+  \item \href{https://docs.github.com/en/copilot/reference/copilot-billing/model-multipliers-for-annual-plans}{Model multipliers for annual plans (legacy)}.
+  \item \href{https://docs.github.com/en/billing/concepts/product-billing/github-copilot-premium-requests}{Overview of request-based billing (legacy)}.
+\end{itemize}
+
+\subsection*{Community \& practitioner}
+\begin{itemize}
+  \item \href{https://github.com/orgs/community/discussions/163104}{GitHub Community \#163104 --- Optimising Copilot Premium Request usage}.
+  \item \href{https://smartscope.blog/en/generative-ai/github-copilot/github-copilot-premium-request-optimization/}{SmartScope --- Premium request optimization: 8 anti-patterns}.
+  \item \href{https://alessio.franceschelli.me/posts/ai/stop-wasting-premium-requests-in-github-copilot/}{A. Franceschelli --- The ``ask tool'' trick}.
+  \item \href{https://github.blog/news-insights/company-news/changes-to-github-copilot-individual-plans/}{GitHub Blog --- Changes to Copilot Individual plans}.
+\end{itemize}
+
+\subsection*{Industry coverage (context, not authoritative)}
+TheRouter.ai, ChatForest, DEV Community, prodSens, AI Tool Briefing, TechJournal, Medium reports --- all documented user-reported cost spikes (10--50$\times$ in extremes, \$30--40 agentic sessions).
+
+\subsection*{What was NOT verified}
+\begin{itemize}
+  \item The retrieval mechanism behind \texttt{@workspace}/\texttt{\#codebase} is not fully documented; the cost characterisation in \cref{sec:surfaces} reflects observable behaviour, not a published spec.
+  \item Per-surface tool-call output handling in Agent mode (full re-injection vs. summarisation) is implementation-defined. The ``tool output stacks'' claim is the right \emph{budgeting} mental model regardless.
+\end{itemize}
+
+\vspace{2em}
+\noindent\emph{Last verified: 2026-06-08. When GitHub publishes a new rate card, re-fetch the models-and-pricing reference page and update \cref{app:pricing}.}
+
+\end{document}

@@ -1,0 +1,14 @@
+\babel@toc {english}{}\relax 
+\contentsline {section}{\numberline {1}What changed on 1 June 2026}{1}{section.1}%
+\contentsline {section}{\numberline {2}Where the money actually goes --- the five surfaces}{2}{section.2}%
+\contentsline {section}{\numberline {3}The cost equation --- a mental model}{2}{section.3}%
+\contentsline {paragraph}{Back-of-envelope conversions}{3}{paragraph*.1}%
+\contentsline {section}{\numberline {4}The four levers, in priority order}{3}{section.4}%
+\contentsline {section}{\numberline {5}The two-lane workflow}{3}{section.5}%
+\contentsline {section}{\numberline {6}Anti-patterns --- stop doing this}{4}{section.6}%
+\contentsline {section}{\numberline {7}Agent-mode brief template}{4}{section.7}%
+\contentsline {paragraph}{Concrete example.}{4}{paragraph*.2}%
+\contentsline {section}{\numberline {8}Quick-wins checklist}{4}{section.8}%
+\contentsline {paragraph}{Watch the counter --- thresholds.}{5}{paragraph*.3}%
+\contentsline {section}{\numberline {A}Order-of-magnitude pricing (per 1M tokens, USD)}{5}{appendix.A}%
+\contentsline {section}{\numberline {B}Sources}{6}{appendix.B}%
